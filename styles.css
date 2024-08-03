@@ -13,8 +13,8 @@ body {
 
 #ball {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 2vw;
+    height: 2vw;
     background-color: red;
     border-radius: 50%;
     bottom: 70%;
@@ -24,8 +24,8 @@ body {
 
 .platform {
     position: absolute;
-    width: 150px; /* Aumentar o tamanho das plataformas */
-    height: 15px; /* Aumentar a altura das plataformas */
+    width: 15vw;
+    height: 1.5vw;
     background-color: white;
 }
 
@@ -33,16 +33,16 @@ body {
     position: absolute;
     top: 0;
     width: 100%;
-    height: 20px;
+    height: 2vw;
     background-color: gray;
 }
 
 #timer {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 1vw;
+    right: 1vw;
     color: white;
-    font-size: 20px;
+    font-size: 2vw;
     font-family: Arial, sans-serif;
 }
 
@@ -56,7 +56,37 @@ body {
 }
 
 #start-button {
-    padding: 10px 20px;
-    font-size: 20px;
+    padding: 1vw 2vw;
+    font-size: 2vw;
+    cursor: pointer;
+}
+
+#game-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: black;
+    font-family: Arial, sans-serif;
+}
+
+#game-over-message {
+    text-align: center;
+}
+
+#final-time {
+    font-size: 3vw;
+    margin-bottom: 20px;
+}
+
+#restart-button {
+    padding: 1vw 2vw;
+    font-size: 2vw;
     cursor: pointer;
 }
