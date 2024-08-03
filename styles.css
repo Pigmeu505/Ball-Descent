@@ -1,0 +1,62 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: none; /* Ocultar o jogo inicialmente */
+}
+
+#ball {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: red;
+    border-radius: 50%;
+    bottom: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.platform {
+    position: absolute;
+    width: 150px; /* Aumentar o tamanho das plataformas */
+    height: 15px; /* Aumentar a altura das plataformas */
+    background-color: white;
+}
+
+#spike-wall {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 20px;
+    background-color: gray;
+}
+
+#timer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+}
+
+#menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+}
+
+#start-button {
+    padding: 10px 20px;
+    font-size: 20px;
+    cursor: pointer;
+}
