@@ -99,6 +99,7 @@ function restartGame() {
     ballY = window.innerHeight / 2 - ball.clientHeight / 2;
     ball.style.left = `${ballX}px`;
     ball.style.top = `${ballY}px`;
+    ball.style.backgroundColor = selectedColor; // Restabelece a cor selecionada
 
     platforms.forEach(platform => gameContainer.removeChild(platform));
     platforms = [];
@@ -123,57 +124,60 @@ function endGame() {
     clearInterval(timerInterval);
     clearInterval(platformInterval);
     clearInterval(speedIncreaseInterval);
-    finalTimeElement.textContent = timerElement.textContent;
-    gameOverScreen.style.display = 'block';
+
     gameContainer.style.display = 'none';
+    gameOverScreen.style.display = 'block';
+    finalTimeElement.textContent = timerElement.textContent;
 }
 
-function startGame() {
+function handleStartButtonClick() {
     menu.style.display = 'none';
-    optionsMenu.style.display = 'none';
+    gameContainer.style.display = 'block';
     restartGame();
 }
 
-startButton.addEventListener('click', startGame);
-
-optionsButton.addEventListener('click', () => {
+function handleOptionsButtonClick() {
     menu.style.display = 'none';
     optionsMenu.style.display = 'block';
-});
+}
 
-backButton.addEventListener('click', () => {
+function handleBackButtonClick() {
     optionsMenu.style.display = 'none';
     menu.style.display = 'block';
-});
+}
 
-colorOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        selectedColor = option.getAttribute('data-color');
-        ball.style.backgroundColor = selectedColor;
-        exampleBall.style.backgroundColor = selectedColor;
-    });
-});
+function handleColorOptionClick(event) {
+    selectedColor = event.target.dataset.color;
+    exampleBall.style.backgroundColor = selectedColor;
+}
 
-restartButton.addEventListener('click', startGame);
+function handleRestartButtonClick() {
+    restartGame();
+}
 
-optionsFromGameButton.addEventListener('click', () => {
+function handleOptionsFromGameButtonClick() {
     gameOverScreen.style.display = 'none';
-    optionsMenu.style.display = 'block'; // Exibe o menu de opções
+    optionsMenu.style.display = 'block';
+}
+
+startButton.addEventListener('click', handleStartButtonClick);
+optionsButton.addEventListener('click', handleOptionsButtonClick);
+backButton.addEventListener('click', handleBackButtonClick);
+colorOptions.forEach(option => option.addEventListener('click', handleColorOptionClick));
+restartButton.addEventListener('click', handleRestartButtonClick);
+optionsFromGameButton.addEventListener('click', handleOptionsFromGameButtonClick);
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'a') moveBallLeft();
+    if (event.key === 'd') moveBallRight();
 });
 
 document.addEventListener('keydown', event => {
-    if (event.key === 'ArrowLeft' || event.key === 'a') {
-        moveBallLeft();
-    }
-    if (event.key === 'ArrowRight' || event.key === 'd') {
-        moveBallRight();
-    }
+    if (event.key === 'a') moveBallLeft();
+    if (event.key === 'd') moveBallRight();
 });
 
-document.addEventListener('touchstart', event => {
-    if (event.touches[0].clientX < window.innerWidth / 2) {
-        moveBallLeft();
-    } else {
-        moveBallRight();
-    }
+document.addEventListener('click', event => {
+    if (event.clientX < window.innerWidth / 2) moveBallLeft();
+    else moveBallRight();
 });
