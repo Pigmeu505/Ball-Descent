@@ -4,20 +4,29 @@ const spikeWall = document.getElementById('spike-wall');
 const timerElement = document.getElementById('timer');
 const menu = document.getElementById('menu');
 const startButton = document.getElementById('start-button');
-const gameOverScreen = document.getElementById('game-over-screen');
-const finalTime = document.getElementById('final-time');
+const optionsButton = document.getElementById('options-button');
+const optionsMenu = document.getElementById('options-menu');
+const backButton = document.getElementById('back-button');
+const exampleBall = document.getElementById('example-ball');
+const colorOptions = document.querySelectorAll('.color-option');
+const gameOverScreen = document.getElementById('game-over');
+const finalTimeElement = document.getElementById('final-time');
 const restartButton = document.getElementById('restart-button');
+const optionsFromGameButton = document.getElementById('options-from-game-button');
 
 let ballX;
 let ballY;
 let ballSpeedY = 2; // Velocidade inicial da bola
 let ballSpeedX = 6; // Velocidade lateral inicial
+let platformSpeed = 1; // Velocidade inicial das plataformas
 let platforms = [];
 let gameInterval;
 let timerInterval;
 let platformInterval;
 let speedIncreaseInterval;
+let speedIncrement = 0.5; // Incremento inicial da velocidade
 let seconds = 0;
+let selectedColor = 'red';
 
 function createPlatform(y) {
     const platform = document.createElement('div');
@@ -43,7 +52,7 @@ function moveBall() {
 
     // Verifica colisão com as plataformas
     platforms.forEach((platform, index) => {
-        platform.style.top = `${parseInt(platform.style.top) - ballSpeedY * 0.5}px`; // Reduzir a velocidade das plataformas
+        platform.style.top = `${parseInt(platform.style.top) - platformSpeed}px`; // Movimenta a plataforma com a velocidade ajustada
 
         if (parseInt(platform.style.top) < -parseInt(platform.style.height)) {
             gameContainer.removeChild(platform);
@@ -80,41 +89,33 @@ function updateTimer() {
 }
 
 function increaseSpeed() {
-    ballSpeedY += 0.1; // Aumenta a velocidade da bola
-    ballSpeedX += 0.1; // Aumenta a velocidade lateral da bola
+    ballSpeedY += speedIncrement; // Aumenta a velocidade da bola
+    ballSpeedX += speedIncrement; // Aumenta a velocidade lateral da bola
+    platformSpeed += speedIncrement; // Aumenta a velocidade das plataformas
 }
 
 function restartGame() {
     ballX = window.innerWidth / 2 - ball.clientWidth / 2;
-    ballY = window.innerHeight * 0.3;
+    ballY = window.innerHeight / 2 - ball.clientHeight / 2;
+    ball.style.left = `${ballX}px`;
+    ball.style.top = `${ballY}px`;
+
     platforms.forEach(platform => gameContainer.removeChild(platform));
     platforms = [];
-    for (let i = 0; i < 7; i++) { // Aumente o número de plataformas iniciais
-        createPlatform(window.innerHeight - (i * 100));
-    }
+
     seconds = 0;
     timerElement.textContent = '00:00';
-    clearInterval(timerInterval);
-    clearInterval(platformInterval);
-    clearInterval(speedIncreaseInterval);
-    ballSpeedY = 2; // Redefine a velocidade inicial da bola
-    ballSpeedX = 6; // Redefine a velocidade lateral inicial
-    timerInterval = setInterval(updateTimer, 1000);
+    ballSpeedY = 2; // Resetar a velocidade da bola
+    ballSpeedX = 6; // Resetar a velocidade lateral
+    platformSpeed = 1; // Resetar a velocidade das plataformas
+    speedIncrement = 0.5; // Resetar o incremento de velocidade
+
     gameInterval = setInterval(moveBall, 20);
-    platformInterval = setInterval(() => createPlatform(window.innerHeight), 2000); // Adicione novas plataformas a cada 2 segundos
-    speedIncreaseInterval = setInterval(increaseSpeed, 30000); // Aumenta a velocidade a cada 30 segundos
-}
-
-function showMenu() {
-    gameContainer.style.display = 'none';
-    menu.style.display = 'block';
+    timerInterval = setInterval(updateTimer, 1000);
+    platformInterval = setInterval(() => createPlatform(window.innerHeight), 1500);
+    speedIncreaseInterval = setInterval(increaseSpeed, 30000);
     gameOverScreen.style.display = 'none';
-}
-
-function startGame() {
-    menu.style.display = 'none';
     gameContainer.style.display = 'block';
-    restartGame();
 }
 
 function endGame() {
@@ -122,37 +123,57 @@ function endGame() {
     clearInterval(timerInterval);
     clearInterval(platformInterval);
     clearInterval(speedIncreaseInterval);
-    finalTime.textContent = timerElement.textContent;
-    gameOverScreen.style.display = 'flex';
+    finalTimeElement.textContent = timerElement.textContent;
+    gameOverScreen.style.display = 'block';
+    gameContainer.style.display = 'none';
 }
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'a' || e.key === 'ArrowLeft') moveBallLeft();
-    if (e.key === 'd' || e.key === 'ArrowRight') moveBallRight();
+function startGame() {
+    menu.style.display = 'none';
+    optionsMenu.style.display = 'none';
+    restartGame();
+}
+
+startButton.addEventListener('click', startGame);
+
+optionsButton.addEventListener('click', () => {
+    menu.style.display = 'none';
+    optionsMenu.style.display = 'block';
 });
 
-document.addEventListener('touchstart', (event) => {
-    const touch = event.touches[0];
-    if (touch.clientX < window.innerWidth / 2) {
+backButton.addEventListener('click', () => {
+    optionsMenu.style.display = 'none';
+    menu.style.display = 'block';
+});
+
+colorOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        selectedColor = option.getAttribute('data-color');
+        ball.style.backgroundColor = selectedColor;
+        exampleBall.style.backgroundColor = selectedColor;
+    });
+});
+
+restartButton.addEventListener('click', startGame);
+
+optionsFromGameButton.addEventListener('click', () => {
+    gameOverScreen.style.display = 'none';
+    optionsMenu.style.display = 'block'; // Exibe o menu de opções
+});
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft' || event.key === 'a') {
+        moveBallLeft();
+    }
+    if (event.key === 'ArrowRight' || event.key === 'd') {
+        moveBallRight();
+    }
+});
+
+document.addEventListener('touchstart', event => {
+    if (event.touches[0].clientX < window.innerWidth / 2) {
         moveBallLeft();
     } else {
         moveBallRight();
     }
 });
-
-restartButton.addEventListener('click', () => {
-    gameOverScreen.style.display = 'none';
-    showMenu();
-});
-
-startButton.addEventListener('click', startGame);
-
-window.onload = () => {
-    showMenu();
-    // Ajuste os tamanhos com base na largura da janela
-    const ballSize = window.innerWidth * 0.02;
-    ball.style.width = `${ballSize}px`;
-    ball.style.height = `${ballSize}px`;
-    ballX = window.innerWidth / 2 - ballSize / 2;
-    ballY = window.innerHeight * 0.3;
-};
