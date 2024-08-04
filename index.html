@@ -2,24 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo da Bolinha</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="menu">
         <button id="start-button">Start</button>
+        <button id="options-button">Opções</button>
+    </div>
+    <div id="options-menu">
+        <div id="example-ball"></div>
+        <div id="color-picker">
+            <div class="color-option" data-color="red" style="background-color: red;"></div>
+            <div class="color-option" data-color="blue" style="background-color: blue;"></div>
+            <div class="color-option" data-color="green" style="background-color: green;"></div>
+            <div class="color-option" data-color="yellow" style="background-color: yellow;"></div>
+            <div class="color-option" data-color="purple" style="background-color: purple;"></div>
+        </div>
+        <button id="back-button">Voltar</button>
     </div>
     <div id="game-container">
         <div id="spike-wall"></div>
         <div id="timer">00:00</div>
         <div id="ball"></div>
     </div>
-    <div id="game-over-screen">
-        <div id="game-over-message">
-            <div id="final-time">00:00</div>
-            <button id="restart-button">Jogar Novamente</button>
-        </div>
+    <div id="game-over">
+        <div id="final-time">00:00</div>
+        <button id="restart-button">Jogar Novamente</button>
+        <button id="options-from-game-button">Opções</button> <!-- Novo botão de opções -->
     </div>
     <script src="script.js"></script>
 </body>
