@@ -27,8 +27,6 @@ let speedIncreaseInterval;
 let speedIncrement = 0.5; // Incremento inicial da velocidade
 let seconds = 0;
 let selectedColor = 'red';
-let touchStartX = 0; // Variável para armazenar a posição inicial do toque
-let touchEndX = 0;   // Variável para armazenar a posição final do toque
 
 function createPlatform(y) {
     const platform = document.createElement('div');
@@ -126,32 +124,8 @@ function endGame() {
     clearInterval(platformInterval);
     clearInterval(speedIncreaseInterval);
     finalTimeElement.textContent = timerElement.textContent;
-
-    // Enviar o score para o Firebase
-    const userName = prompt("Enter your name:");
-    if (userName) {
-        db.collection('scores').add({
-            name: userName,
-            score: seconds
-        }).then(() => {
-            console.log("Score saved successfully!");
-        }).catch(error => {
-            console.error("Error saving score: ", error);
-        });
-    }
-
     gameOverScreen.style.display = 'block';
     gameContainer.style.display = 'none';
-    showScores(); // Atualiza a tabela de pontuação
-}
-
-function showScores() {
-    db.collection('scores').orderBy('score', 'desc').limit(10).get().then(snapshot => {
-        const scoresList = snapshot.docs.map(doc => `<li>${doc.data().name}: ${doc.data().score} seconds</li>`).join('');
-        document.getElementById('scores-list').innerHTML = `<ul>${scoresList}</ul>`;
-    }).catch(error => {
-        console.error("Error retrieving scores: ", error);
-    });
 }
 
 function startGame() {
@@ -197,15 +171,9 @@ document.addEventListener('keydown', event => {
 });
 
 document.addEventListener('touchstart', event => {
-    touchStartX = event.touches[0].clientX;
-});
-
-document.addEventListener('touchend', event => {
-    touchEndX = event.changedTouches[0].clientX;
-
-    if (touchStartX < window.innerWidth / 2 && touchEndX === touchStartX) {
+    if (event.touches[0].clientX < window.innerWidth / 2) {
         moveBallLeft();
-    } else if (touchStartX >= window.innerWidth / 2 && touchEndX === touchStartX) {
+    } else {
         moveBallRight();
     }
 });
