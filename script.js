@@ -27,6 +27,8 @@ let speedIncreaseInterval;
 let speedIncrement = 0.5; // Incremento inicial da velocidade
 let seconds = 0;
 let selectedColor = 'red';
+let touchStartX = 0; // Variável para armazenar a posição inicial do toque
+let touchEndX = 0;   // Variável para armazenar a posição final do toque
 
 function createPlatform(y) {
     const platform = document.createElement('div');
@@ -99,7 +101,6 @@ function restartGame() {
     ballY = window.innerHeight / 2 - ball.clientHeight / 2;
     ball.style.left = `${ballX}px`;
     ball.style.top = `${ballY}px`;
-    ball.style.backgroundColor = selectedColor; // Restabelece a cor selecionada
 
     platforms.forEach(platform => gameContainer.removeChild(platform));
     platforms = [];
@@ -124,60 +125,87 @@ function endGame() {
     clearInterval(timerInterval);
     clearInterval(platformInterval);
     clearInterval(speedIncreaseInterval);
-
-    gameContainer.style.display = 'none';
-    gameOverScreen.style.display = 'block';
     finalTimeElement.textContent = timerElement.textContent;
+
+    // Enviar o score para o Firebase
+    const userName = prompt("Enter your name:");
+    if (userName) {
+        db.collection('scores').add({
+            name: userName,
+            score: seconds
+        }).then(() => {
+            console.log("Score saved successfully!");
+        }).catch(error => {
+            console.error("Error saving score: ", error);
+        });
+    }
+
+    gameOverScreen.style.display = 'block';
+    gameContainer.style.display = 'none';
+    showScores(); // Atualiza a tabela de pontuação
 }
 
-function handleStartButtonClick() {
+function showScores() {
+    db.collection('scores').orderBy('score', 'desc').limit(10).get().then(snapshot => {
+        const scoresList = snapshot.docs.map(doc => `<li>${doc.data().name}: ${doc.data().score} seconds</li>`).join('');
+        document.getElementById('scores-list').innerHTML = `<ul>${scoresList}</ul>`;
+    }).catch(error => {
+        console.error("Error retrieving scores: ", error);
+    });
+}
+
+function startGame() {
     menu.style.display = 'none';
-    gameContainer.style.display = 'block';
+    optionsMenu.style.display = 'none';
     restartGame();
 }
 
-function handleOptionsButtonClick() {
+startButton.addEventListener('click', startGame);
+
+optionsButton.addEventListener('click', () => {
     menu.style.display = 'none';
     optionsMenu.style.display = 'block';
-}
+});
 
-function handleBackButtonClick() {
+backButton.addEventListener('click', () => {
     optionsMenu.style.display = 'none';
     menu.style.display = 'block';
-}
+});
 
-function handleColorOptionClick(event) {
-    selectedColor = event.target.dataset.color;
-    exampleBall.style.backgroundColor = selectedColor;
-}
+colorOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        selectedColor = option.getAttribute('data-color');
+        ball.style.backgroundColor = selectedColor;
+        exampleBall.style.backgroundColor = selectedColor;
+    });
+});
 
-function handleRestartButtonClick() {
-    restartGame();
-}
+restartButton.addEventListener('click', startGame);
 
-function handleOptionsFromGameButtonClick() {
+optionsFromGameButton.addEventListener('click', () => {
     gameOverScreen.style.display = 'none';
-    optionsMenu.style.display = 'block';
-}
-
-startButton.addEventListener('click', handleStartButtonClick);
-optionsButton.addEventListener('click', handleOptionsButtonClick);
-backButton.addEventListener('click', handleBackButtonClick);
-colorOptions.forEach(option => option.addEventListener('click', handleColorOptionClick));
-restartButton.addEventListener('click', handleRestartButtonClick);
-optionsFromGameButton.addEventListener('click', handleOptionsFromGameButtonClick);
-
-document.addEventListener('keydown', event => {
-    if (event.key === 'a') moveBallLeft();
-    if (event.key === 'd') moveBallRight();
+    optionsMenu.style.display = 'block'; // Exibe o menu de opções
 });
 
 document.addEventListener('keydown', event => {
-    if (event.key === 'a') moveBallLeft();
-    if (event.key === 'd') moveBallRight();
+    if (event.key === 'ArrowLeft' || event.key === 'a') {
+        moveBallLeft();
+    }
+    if (event.key === 'ArrowRight' || event.key === 'd') {
+        moveBallRight();
+    }
 });
 
-document.addEventListener('click', event => {
-    if (event.clientX < window.innerWidth / 2) moveBallLeft();
-    else moveBallRight();
+document.addEventListener('touchstart', event => {
+    touchStartX = event.touches[0].clientX;
+});
+
+document.addEventListener('touchend', event => {
+    touchEndX = event.changedTouches[0].clientX;
+
+    if (touchStartX < window.innerWidth / 2 && touchEndX === touchStartX) {
+        moveBallLeft();
+    } else if (touchStartX >= window.innerWidth / 2 && touchEndX === touchStartX) {
+        moveBallRight();
+    }
 });
