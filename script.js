@@ -18,6 +18,7 @@ let ballX;
 let ballY;
 let ballSpeedY = 2; // Velocidade inicial da bola
 let ballSpeedX = 6; // Velocidade lateral inicial
+let mobileBallSpeedX = 3; // Velocidade lateral para dispositivos móveis
 let platformSpeed = 1; // Velocidade inicial das plataformas
 let platforms = [];
 let gameInterval;
@@ -27,6 +28,9 @@ let speedIncreaseInterval;
 let speedIncrement = 0.5; // Incremento inicial da velocidade
 let seconds = 0;
 let selectedColor = 'red';
+let moveDirection = null;
+let moveInterval;
+let isMobile = /Mobi|Android/i.test(navigator.userAgent); // Detectar dispositivos móveis
 
 function createPlatform(y) {
     const platform = document.createElement('div');
@@ -59,15 +63,22 @@ function moveBall() {
             platforms.splice(index, 1);
         }
 
+        // Ajusta a colisão da bolinha com as plataformas
         if (
             ballY + ball.clientHeight > parseInt(platform.style.top) &&
-            ballY + ball.clientHeight < parseInt(platform.style.top) + platform.clientHeight &&
+            ballY < parseInt(platform.style.top) + platform.clientHeight &&
             ballX + ball.clientWidth > parseInt(platform.style.left) &&
             ballX < parseInt(platform.style.left) + platform.clientWidth
         ) {
             ballY = parseInt(platform.style.top) - ball.clientHeight;
+            ballSpeedY = Math.max(ballSpeedY, 2); // Garante que a bolinha não passe rapidamente
         }
     });
+
+    // Ajusta o comportamento da bolinha após 1 minuto para dispositivos móveis
+    if (seconds >= 60 && isMobile) {
+        ballSpeedX = mobileBallSpeedX; // Reduz a velocidade lateral
+    }
 
     ball.style.top = `${ballY}px`;
     ball.style.left = `${ballX}px`;
@@ -79,6 +90,14 @@ function moveBallLeft() {
 
 function moveBallRight() {
     if (ballX < window.innerWidth - ball.clientWidth) ballX += ballSpeedX;
+}
+
+function moveBallLeftMobile() {
+    if (ballX > 0) ballX -= mobileBallSpeedX;
+}
+
+function moveBallRightMobile() {
+    if (ballX < window.innerWidth - ball.clientWidth) ballX += mobileBallSpeedX;
 }
 
 function updateTimer() {
@@ -160,6 +179,22 @@ function handleOptionsFromGameButtonClick() {
     optionsMenu.style.display = 'block';
 }
 
+function startMovingBall(direction) {
+    moveDirection = direction;
+    if (!moveInterval) {
+        moveInterval = setInterval(() => {
+            if (moveDirection === 'left') moveBallLeftMobile();
+            if (moveDirection === 'right') moveBallRightMobile();
+        }, 30); // Aumenta o intervalo para desacelerar a movimentação
+    }
+}
+
+function stopMovingBall() {
+    clearInterval(moveInterval);
+    moveInterval = null;
+    moveDirection = null;
+}
+
 startButton.addEventListener('click', handleStartButtonClick);
 optionsButton.addEventListener('click', handleOptionsButtonClick);
 backButton.addEventListener('click', handleBackButtonClick);
@@ -172,12 +207,9 @@ document.addEventListener('keydown', event => {
     if (event.key === 'd') moveBallRight();
 });
 
-document.addEventListener('keydown', event => {
-    if (event.key === 'a') moveBallLeft();
-    if (event.key === 'd') moveBallRight();
+document.addEventListener('touchstart', event => {
+    if (event.touches[0].clientX < window.innerWidth / 2) startMovingBall('left');
+    else startMovingBall('right');
 });
 
-document.addEventListener('click', event => {
-    if (event.clientX < window.innerWidth / 2) moveBallLeft();
-    else moveBallRight();
-});
+document.addEventListener('touchend', stopMovingBall);
